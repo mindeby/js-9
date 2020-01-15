@@ -46,11 +46,14 @@ app.use('/api', courseRoutes)
 app.use('/api', userRoutes)
 
 // setup a friendly greeting for the root route
-app.get('/', (req, res) => {
+app.get('/', asyncHandler(async (req, res) => {
+  // Test the connection to the database
+   //console.log('Connection to the database successful!');
+   //await sequelize.authenticate();
   res.json({
     message: 'Welcome to the REST API project!',
   });
-});
+}));
 
 
 // send 404 if no other route matched

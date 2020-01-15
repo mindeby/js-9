@@ -3,7 +3,7 @@
 // load modules
 const express = require('express');
 const morgan = require('morgan');
-const bodyParser = require('body-parser');
+const bcryptjs = require('bcryptjs');
 const User = require('../models').User;
 const Course = require('../models').Course;
 
@@ -27,8 +27,13 @@ router.get('/users', asyncHandler(async (req, res) => {
 }));
 
 router.post('/users', asyncHandler(async (req, res) => {
-  const newUser = await User.create(req.body);
-  res.json(newUser);
+  const newUser = await User.create({
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    emailAddress: req.body.emailAddress,
+    password: bcryptjs.hashSync(req.body.password)
+  });
+  res.status(201).end();
 }));
 
 module.exports = router;
