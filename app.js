@@ -3,6 +3,9 @@
 // load modules
 const express = require('express');
 const morgan = require('morgan');
+const bodyParser = require('body-parser');
+
+
 
 const User = require('./models').User;
 
@@ -11,6 +14,12 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
 
 // create the Express app
 const app = express();
+
+//Body Parser - to read the req.body
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(bodyParser.json());
 
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
@@ -29,9 +38,19 @@ function asyncHandler(cb){
 // TODO setup your api routes here
 
 // setup a friendly greeting for the root route
-app.get('/', asyncHandler(async (req, res) => {
+app.get('/users', asyncHandler(async (req, res) => {
   const allUsers = await User.findAll();
   res.json(allUsers);
+}));
+
+app.post('/users', asyncHandler(async (req, res) => {
+  const newUser = await User.create({
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    emailAddress: req.body.emailAddress,
+    password: req.body.password
+  });
+  res.json(newUser);
 }));
 
 
