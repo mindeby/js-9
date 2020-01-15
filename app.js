@@ -5,6 +5,11 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
+const courseRoutes = require('./routes/courseRoutes');
+const userRoutes = require('./routes/userRoutes');
+
+
+
 
 
 const User = require('./models').User;
@@ -14,12 +19,6 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
 
 // create the Express app
 const app = express();
-
-//Body Parser - to read the req.body
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
-app.use(bodyParser.json());
 
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
@@ -35,23 +34,23 @@ function asyncHandler(cb){
   }
 }
 
+//Body Parser - to read the req.body
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(bodyParser.json());
+
+
 // TODO setup your api routes here
+app.use('/api', courseRoutes)
+app.use('/api', userRoutes)
 
 // setup a friendly greeting for the root route
-app.get('/users', asyncHandler(async (req, res) => {
-  const allUsers = await User.findAll();
-  res.json(allUsers);
-}));
-
-app.post('/users', asyncHandler(async (req, res) => {
-  const newUser = await User.create({
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    emailAddress: req.body.emailAddress,
-    password: req.body.password
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to the REST API project!',
   });
-  res.json(newUser);
-}));
+});
 
 
 // send 404 if no other route matched
