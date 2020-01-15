@@ -64,16 +64,23 @@ router.post('/users', asyncHandler(async (req, res) => {
     emailAddress: req.body.emailAddress,
     password: bcryptjs.hashSync(req.body.password)
   });
-  res.status(201).end();
+  res.status(201).redirect("/").end();
 }));
 
-//PROTECTED routes
+/*//Not Authenticated user
+router.get('/users', asyncHandler(async (req, res) => {
+  const allUsers = await User.findAll();
+  res.status(200).json(allUsers)
+}));*/
+
+//Authenticated user
 router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
   const user = req.currentUser;
   res.status(200).json({
     firstName: user.firstName,
     lastName: user.lastName,
-    username: user.emailAddress,
+    email: user.emailAddress,
+    id: user.id,
   })
 }));
 
