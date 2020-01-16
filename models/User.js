@@ -20,8 +20,8 @@ module.exports = (sequelize) => {
     },
     password: {
       type: Sequelize.STRING,
-    }
-  }, { sequelize });
+    },
+  }, { sequelize, timestamps: false });
 
   User.associate = (models) => {
     User.hasMany(models.Course, {
@@ -31,6 +31,5 @@ module.exports = (sequelize) => {
       },
     });
   };
-
   return User;
 };

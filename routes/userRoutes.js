@@ -8,6 +8,7 @@ const auth = require('basic-auth');
 const User = require('../models').User;
 const Course = require('../models').Course;
 
+//USER authentication
 const authenticateUser = async (req, res, next) => {
   let message = null;
   const credentials = auth(req);
@@ -52,20 +53,8 @@ function asyncHandler(cb){
 
 const router = express.Router();
 
-//router.get('/users', asyncHandler(async (req, res) => {
-//  const allUsers = await User.findAll();
-//  res.json(allUsers);
-//}));
-
-router.post('/users', asyncHandler(async (req, res) => {
-  const newUser = await User.create({
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    emailAddress: req.body.emailAddress,
-    password: bcryptjs.hashSync(req.body.password)
-  });
-  res.status(201).redirect("/").end();
-}));
+//PUT and POST requests: data validation
+const { check, validationResult } = require('express-validator');
 
 /*//Not Authenticated user
 router.get('/users', asyncHandler(async (req, res) => {
@@ -83,5 +72,58 @@ router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
     id: user.id,
   })
 }));
+
+router.post('/users', [
+  check('firstName')
+    .exists()
+    .withMessage('Please provide a value for "first name"'),
+  check('lastName')
+    .exists()
+    .withMessage('Please provide a value for "last Name"'),
+  check('emailAddress')
+    .custom(async email => {
+        const user = await User.findOne({where: {emailAddress: email }});
+        if (user) {
+          throw new Error('Email already registered')
+        }
+      })
+    .withMessage('This email address already exists')
+    .exists()
+    .isEmail()
+    .withMessage('Please provide a value for "emailAddress"'),
+  check('password')
+    .exists()
+    .withMessage('Please provide a value for "password"'),
+], asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+  // Use the Array `map()` method to get a list of error messages.
+  const errorMessages = errors.array().map(error => error.msg);
+  res.status(400).json({ errors: errorMessages });
+  } else {
+    const user = await User.create({
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      emailAddress: req.body.emailAddress,
+      password: bcryptjs.hashSync(req.body.password) //hashing the password
+    });
+    res.status(201).redirect("/").end();
+  }
+}));
+
+/*//deletes users
+router.delete('/users/:id', asyncHandler(async (req, res) => {
+  const user = await User.findByPk(req.params.id);
+  if(user) {
+    await user.destroy();
+    res.status(204).end();
+  } else {
+    res.sendStatus(404);
+  }
+}));*/
+
+
+
+
 
 module.exports = router;

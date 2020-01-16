@@ -22,8 +22,8 @@ module.exports = (sequelize) => {
     materialsNeeded: {
       type: Sequelize.STRING,
       allowNull: true,
-    }
-  }, { sequelize });
+    },
+  }, { sequelize, timestamps: false });
 
   Course.associate = (models) => {
     Course.belongsTo(models.User, {
@@ -33,6 +33,5 @@ module.exports = (sequelize) => {
       },
     });
   };
-
   return Course;
 };

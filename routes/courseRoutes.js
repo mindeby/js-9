@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 const User = require('../models').User;
 const Course = require('../models').Course;
 
+
 /* Handler function to wrap each route. */
 function asyncHandler(cb){
   return async(req, res, next) => {
@@ -54,6 +55,9 @@ const authenticateUser = async (req, res, next) => {
   }
 }
 
+//PUT and POST requests: data validation
+const { check, validationResult } = require('express-validator');
+
 //Returns a list of courses
 router.get('/courses', asyncHandler(async (req, res) => {
   const allCourses = await Course.findAll();
@@ -68,47 +72,81 @@ router.get('/courses/:id', asyncHandler(async (req, res) => {
 }));
 
 //Creates a course, sets the Location header to the URI for the course, and returns no content
-router.post('/courses', authenticateUser, asyncHandler(async (req, res) => {
-  const newCourse = await Course.create({
-    title: req.body.title,
-    description: req.body.description,
-    estimatedTime: req.body.estimatedTime,
-    materialsNeeded: req.body.materialsNeeded,
-    userId: req.currentUser.id
-  });
-  res.status(201).redirect("/").end();
+router.post('/courses', [
+  check('title')
+    .exists()
+    .withMessage('Please provide a value for "title"'),
+  check('description')
+    .exists()
+    .withMessage('Please provide a value for "description"')], authenticateUser, asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const errorMessages = errors.array().map(error => error.msg);
+    res.status(400).json({ errors: errorMessages });
+  } else {
+    const course = await Course.create({
+      title: req.body.title,
+      description: req.body.description,
+      estimatedTime: req.body.estimatedTime,
+      materialsNeeded: req.body.materialsNeeded,
+      userId: req.currentUser.id
+    });
+  res.status(201).location("/course/" + course.id).end();
+ }
 }));
 
 //Updates a course and returns no content
-router.put('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
-  let course;
-  try {
-    course = await Course.findByPk(req.params.id);
-    if(course) {
-      await course.update({
-        title: req.body.title,
-        description: req.body.description,
-        estimatedTime: req.body.estimatedTime,
-        materialsNeeded: req.body.materialsNeeded,
-        userId: req.currentUser.id
-      });
-      res.status(204).redirect("/").end();
-    } else {
-      res.sendStatus(404);
-    }
-  } catch (error) {
-      throw error; // error caught in the asyncHandler's catch block
-  }
+router.put('/courses/:id', [
+  check('title')
+    .exists()
+    .withMessage('Please provide a value for "title"'),
+  check('description')
+    .exists()
+    .withMessage('Please provide a value for "description"')], authenticateUser, asyncHandler(async (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const errorMessages = errors.array().map(error => error.msg);
+        res.status(400).json({ errors: errorMessages });
+      } else {
+        let course;
+        try {
+          course = await Course.findByPk(req.params.id);
+          if(course) {
+            const user = req.currentUser;
+            if (user.id === course.userId){
+              await course.update({
+                title: req.body.title,
+                description: req.body.description,
+                estimatedTime: req.body.estimatedTime,
+                materialsNeeded: req.body.materialsNeeded,
+                userId: user.id
+              });
+              res.status(204).redirect("/courses").end();
+            } else{
+              res.status(403).json({message: "You don't have the necessary authorization to update this course"})
+            }
+          } else {
+            res.sendStatus(404);
+          }
+        } catch (error) {
+          throw error; // error caught in the asyncHandler's catch block
+        }
+      }
 }));
 
 //Updates a course and returns no content
 router.delete('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
   const course = await Course.findByPk(req.params.id);
   if(course) {
-    await course.destroy();
-    res.status(204).end();
+    const user = req.currentUser;
+    if (user.id === course.userId){
+      await course.destroy();
+      res.status(204).end();
+    } else {
+      res.status(403).json({message: "You don't have the necessary authorization to update this course"})
+    }
   } else {
-    res.sendStatus(404);
+    res.sendStatus(500);
   }
 }));
 
