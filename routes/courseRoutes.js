@@ -54,17 +54,62 @@ const authenticateUser = async (req, res, next) => {
   }
 }
 
-
+//Returns a list of courses
 router.get('/courses', asyncHandler(async (req, res) => {
   const allCourses = await Course.findAll();
   res.status(200).json(allCourses)
 }));
 
 
-//Authenticated user
-router.get('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
-  const courses = await Course.findAll({ where: { userId: req.currentUser } });
-  res.status(200).json(courses)
+ //Returns a course by id
+router.get('/courses/:id', asyncHandler(async (req, res) => {
+  const course = await Course.findByPk(req.params.id);
+  res.status(200).json(course)
+}));
+
+//Creates a course, sets the Location header to the URI for the course, and returns no content
+router.post('/courses', authenticateUser, asyncHandler(async (req, res) => {
+  const newCourse = await Course.create({
+    title: req.body.title,
+    description: req.body.description,
+    estimatedTime: req.body.estimatedTime,
+    materialsNeeded: req.body.materialsNeeded,
+    userId: req.currentUser.id
+  });
+  res.status(201).redirect("/").end();
+}));
+
+//Updates a course and returns no content
+router.put('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
+  let course;
+  try {
+    course = await Course.findByPk(req.params.id);
+    if(course) {
+      await course.update({
+        title: req.body.title,
+        description: req.body.description,
+        estimatedTime: req.body.estimatedTime,
+        materialsNeeded: req.body.materialsNeeded,
+        userId: req.currentUser.id
+      });
+      res.status(204).redirect("/").end();
+    } else {
+      res.sendStatus(404);
+    }
+  } catch (error) {
+      throw error; // error caught in the asyncHandler's catch block
+  }
+}));
+
+//Updates a course and returns no content
+router.delete('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
+  const course = await Course.findByPk(req.params.id);
+  if(course) {
+    await course.destroy();
+    res.status(204).end();
+  } else {
+    res.sendStatus(404);
+  }
 }));
 
 module.exports = router;

@@ -10,41 +10,26 @@ module.exports = (sequelize) => {
       autoIncrement: true
     },
     firstName: {
-    type: Sequelize.STRING,
-    validate: {
-      notEmpty: {
-        msg: '"First Name" is required'
-      }
-    }
-  },
+      type: Sequelize.STRING,
+    },
     lastName: {
       type: Sequelize.STRING,
-      validate: {
-        notEmpty: {
-          msg: '"Last Name" is required'
-        }
-      }
     },
     emailAddress: {
       type: Sequelize.STRING,
-      validate: {
-        notEmpty: {
-          msg: '"Email" is required'
-        }
-      }
     },
     password: {
       type: Sequelize.STRING,
-      validate: {
-        notEmpty: {
-          msg: '"password" is required'
-        }
-      }
     }
   }, { sequelize });
 
   User.associate = (models) => {
-    User.hasMany(models.Course, { foreignKey: 'userId' });
+    User.hasMany(models.Course, {
+      foreignKey: {
+        fieldName: "userId",
+        allowNull: false,
+      },
+    });
   };
 
   return User;

@@ -7,36 +7,31 @@ module.exports = (sequelize) => {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
     },
     title: {
-    type: Sequelize.STRING,
-    validate: {
-      notEmpty: {
-        msg: '"Title" is required'
-      }
-    }
-  },
+      type: Sequelize.STRING,
+    },
     description: {
       type: Sequelize.TEXT,
-      validate: {
-        notEmpty: {
-          msg: '"description" is required'
-        }
-      }
     },
     estimatedTime: {
       type: Sequelize.STRING,
-      allowNull: true
+      allowNull: true,
     },
     materialsNeeded: {
       type: Sequelize.STRING,
-      allowNull: true
+      allowNull: true,
     }
   }, { sequelize });
 
   Course.associate = (models) => {
-    Course.belongsTo(models.User, { foreignKey: 'userId' });
+    Course.belongsTo(models.User, {
+      foreignKey: {
+        fieldName: "userId",
+        allowNull: false,
+      },
+    });
   };
 
   return Course;
