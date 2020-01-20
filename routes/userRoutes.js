@@ -7,6 +7,7 @@ const bcryptjs = require('bcryptjs');
 const auth = require('basic-auth');
 const User = require('../models').User;
 const Course = require('../models').Course;
+const router = express.Router();
 
 //USER authentication
 const authenticateUser = async (req, res, next) => {
@@ -51,7 +52,6 @@ function asyncHandler(cb){
   }
 }
 
-const router = express.Router();
 
 //PUT and POST requests: data validation
 const { check, validationResult } = require('express-validator');

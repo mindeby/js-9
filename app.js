@@ -3,7 +3,15 @@
 // load modules
 const express = require('express');
 const morgan = require('morgan');
+// create the Express app
+const app = express();
+//Body Parser - to read the req.body
 const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(bodyParser.json());
+
 const { sequelize } = require('./models');
 
 const courseRoutes = require('./routes/courseRoutes');
@@ -12,8 +20,6 @@ const userRoutes = require('./routes/userRoutes');
 // variable to enable global error logging
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
 
-// create the Express app
-const app = express();
 
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
@@ -28,13 +34,6 @@ function asyncHandler(cb){
     }
   }
 }
-
-//Body Parser - to read the req.body
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
-app.use(bodyParser.json());
-
 
 // TODO setup your api routes here
 app.use('/api', courseRoutes)

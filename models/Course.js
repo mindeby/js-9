@@ -11,9 +11,19 @@ module.exports = (sequelize) => {
     },
     title: {
       type: Sequelize.STRING,
+      validate: {
+        notEmpty: {
+          msg: '"Title" is required'
+        }
+      }
     },
     description: {
       type: Sequelize.TEXT,
+      validate: {
+        notEmpty: {
+          msg: '"description" is required'
+        }
+      }
     },
     estimatedTime: {
       type: Sequelize.STRING,
@@ -23,10 +33,11 @@ module.exports = (sequelize) => {
       type: Sequelize.STRING,
       allowNull: true,
     },
-  }, { sequelize, timestamps: false });
+  }, { sequelize });
 
   Course.associate = (models) => {
     Course.belongsTo(models.User, {
+      as: "User",
       foreignKey: {
         fieldName: "userId",
         allowNull: false,

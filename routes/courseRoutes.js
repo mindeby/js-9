@@ -60,14 +60,33 @@ const { check, validationResult } = require('express-validator');
 
 //Returns a list of courses
 router.get('/courses', asyncHandler(async (req, res) => {
-  const allCourses = await Course.findAll();
+  const allCourses = await Course.findAll({
+    attributes: { exclude: ["createdAt", "updatedAt", "userId"] },
+      include: [
+        {
+          model: User,
+          as: "User",
+          attributes: { exclude: ["password", "createdAt", "updatedAt", "id"] }
+        }
+      ]
+  });
   res.status(200).json(allCourses)
 }));
 
 
  //Returns a course by id
 router.get('/courses/:id', asyncHandler(async (req, res) => {
-  const course = await Course.findByPk(req.params.id);
+  const course = await Course.findByPk(req.params.id, {
+    attributes: { exclude: ["createdAt", "updatedAt", "userId"] },
+      include: [
+        {
+          model: User,
+          as: "User",
+          attributes: {
+            exclude: ["password", "createdAt", "updatedAt", "id"] }
+        }
+      ]
+    });
   res.status(200).json(course)
 }));
 
@@ -121,7 +140,7 @@ router.put('/courses/:id', [
                 materialsNeeded: req.body.materialsNeeded,
                 userId: user.id
               });
-              res.status(204).redirect("/courses").end();
+              res.status(204).end();
             } else{
               res.status(403).json({message: "You don't have the necessary authorization to update this course"})
             }
