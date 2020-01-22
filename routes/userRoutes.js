@@ -47,7 +47,7 @@ function asyncHandler(cb){
     try {
       await cb(req, res, next)
     } catch(error){
-      res.status(500).send(error);
+      next(error);
     }
   }
 }
@@ -107,7 +107,7 @@ router.post('/users', [
       emailAddress: req.body.emailAddress,
       password: bcryptjs.hashSync(req.body.password) //hashing the password
     });
-    res.status(201).redirect("/").end();
+    res.status(201).location("/").end();
   }
 }));
 
