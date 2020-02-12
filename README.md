@@ -1,6 +1,9 @@
 # js-9
  REST API
 
+ An API that allows an authenticated user to create, update and delete their own courses.
+ This project was part of module 9 of the Full Ftack Javascript Course from Treehouse.
+
  ## Getting Started
 
  To get up and running with this project, run the following commands from the root of the folder that contains this README file.
